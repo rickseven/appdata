@@ -1,0 +1,33 @@
+name: Validate feeds
+
+on:
+  push:
+    paths: ["apps/**", "schemas/**", ".github/workflows/validate.yml"]
+  pull_request:
+    paths: ["apps/**", "schemas/**", ".github/workflows/validate.yml"]
+
+# Read-only token: this workflow never needs to write to the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate promo feeds against schema
+        run: >
+          npx --yes --package ajv-cli@5.0.0 --package ajv-formats@2.1.1
+          ajv validate --spec=draft7 -c ajv-formats
+          -s schemas/promo_banners.schema.json
+          -d "apps/*/promo_banners.json"

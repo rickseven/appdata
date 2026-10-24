@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Promo banners feed (schemaVersion 1)",
+  "type": "object",
+  "required": ["schemaVersion", "banners"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "banners": {
+      "type": "array",
+      "maxItems": 12,
+      "items": { "$ref": "#/definitions/banner" }
+    }
+  },
+  "definitions": {
+    "banner": {
+      "type": "object",
+      "required": ["id", "packageId", "image"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "enabled": { "type": "boolean" },
+        "title": { "type": "string" },
+        "packageId": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$"
+        },
+        "startAt": { "type": "string", "format": "date-time" },
+        "endAt": { "type": "string", "format": "date-time" },
+        "image": {
+          "type": "object",
+          "required": ["width", "height", "src"],
+          "properties": {
+            "width": { "type": "number", "exclusiveMinimum": 0 },
+            "height": { "type": "number", "exclusiveMinimum": 0 },
+            "src": {
+              "oneOf": [
+                { "$ref": "#/definitions/httpsUrl" },
+                {
+                  "type": "object",
+                  "required": ["1x"],
+                  "properties": {
+                    "1x": { "$ref": "#/definitions/httpsUrl" },
+                    "2x": { "$ref": "#/definitions/httpsUrl" },
+                    "3x": { "$ref": "#/definitions/httpsUrl" }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "httpsUrl": { "type": "string", "pattern": "^https://" }
+  }
+}
